@@ -1,4 +1,3 @@
-#include <cstddef>
 #include <exception>
 #include <iostream>
 #include <map>
@@ -10,6 +9,7 @@ struct Bank {
 
   public:
     Account() : _value(0.0f) {}
+    float getValue() const { return _value; }
     float &getValue() { return _value; }
   };
 
@@ -96,6 +96,14 @@ public:
     _liquidity -= amount;
     it->second->getValue() += amount;
   }
+
+  const Account &operator[](size_t id) const {
+    std::map<size_t, Account *>::const_iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
+    return *(it->second);
+  }
 };
 
 int main() {
@@ -103,7 +111,8 @@ int main() {
     Bank bank;
     bank.createAccount();
     bank.depositToAccount(0, 100);
-    bank.withdrawFromAccount(0, 200);
+    std::cout << "" << bank[0].getValue() << std::endl;
+    bank.withdrawFromAccount(0, 95);
     bank.deleteAccount(1);
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
