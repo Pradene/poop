@@ -1,6 +1,7 @@
+#include <cstddef>
+#include <exception>
 #include <iostream>
 #include <map>
-#include <ostream>
 
 struct Bank {
   struct Account {
@@ -8,40 +9,37 @@ struct Bank {
     float _value;
 
   public:
-    Account() : _value(0.0) {}
-
+    Account() : _value(0.0f) {}
     float &getValue() { return _value; }
-
-    friend class Bank;
   };
 
-  class AccountNotFoundException {
+  class AccountNotFoundException : public std::exception {
   public:
-    const char *what() const { return "Client doesn't exist"; }
+    const char *what() const throw() { return "Client doesn't exist"; }
   };
-  class DepositNegativeAmount {
+  class DepositNegativeAmount : public std::exception {
   public:
-    const char *what() const { return "Amount negative"; }
+    const char *what() const throw() { return "Amount negative"; }
   };
-  class LiquidityNotSufficient {
+  class LiquidityNotSufficient : public std::exception {
   public:
-    const char *what() const { return "Liquidity not sufficient"; }
+    const char *what() const throw() { return "Liquidity not sufficient"; }
   };
-  class WithdrawTooMuchMoney {
+  class WithdrawTooMuchMoney : public std::exception {
   public:
-    const char *what() const { return "Withdraw too much money"; }
+    const char *what() const throw() { return "Withdraw too much money"; }
   };
 
 private:
-  int _nextId;
-  int _liquidity;
-  std::map<int, Account *> _clientAccounts;
+  size_t _nextId;
+  float _liquidity;
+  std::map<size_t, Account *> _clientAccounts;
 
 public:
-  Bank() : _nextId(0), _liquidity(0) {}
+  Bank() : _nextId(0), _liquidity(0.0f) {}
 
   ~Bank() {
-    std::map<int, Account *>::iterator it = _clientAccounts.begin();
+    std::map<size_t, Account *>::iterator it = _clientAccounts.begin();
     while (it != _clientAccounts.end()) {
       delete it->second;
       it++;
@@ -53,77 +51,65 @@ public:
     _clientAccounts.insert(std::make_pair(_nextId++, new Account()));
   }
 
-  void deleteAccount(int id) {
-    try {
-      std::map<int, Account *>::iterator it = _clientAccounts.find(id);
-      if (it == _clientAccounts.end()) {
-        throw AccountNotFoundException();
-      }
-      delete it->second;
-      _clientAccounts.erase(it);
-    } catch (const AccountNotFoundException &e) {
-      std::cerr << e.what() << std::endl;
+  void deleteAccount(size_t id) {
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
     }
+    delete it->second;
+    _clientAccounts.erase(it);
   }
 
-  void depositToAccount(int id, float amount) {
-    try {
-      if (amount < 0.0) {
-        throw DepositNegativeAmount();
-      }
-      std::map<int, Account *>::iterator it = _clientAccounts.find(id);
-      if (it == _clientAccounts.end()) {
-        throw AccountNotFoundException();
-      }
-      float taxes = amount * 0.05;
-      amount -= taxes;
-      _liquidity += taxes;
-      it->second->getValue() += amount;
-    } catch (const AccountNotFoundException &e) {
-      std::cerr << e.what() << std::endl;
-    } catch (const DepositNegativeAmount &e) {
-      std::cerr << e.what() << std::endl;
+  void depositToAccount(size_t id, float amount) {
+    if (amount < 0.0f) {
+      throw DepositNegativeAmount();
     }
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
+    float taxes = amount * 0.05f;
+    amount -= taxes;
+    _liquidity += taxes;
+    it->second->getValue() += amount;
   }
 
-  void withdrawFromAccount(int id, float amount) {
-    try {
-      std::map<int, Account *>::iterator it = _clientAccounts.find(id);
-      if (it == _clientAccounts.end()) {
-        throw AccountNotFoundException();
-      }
-      if (it->second->getValue() - amount < 0.0) {
-        throw WithdrawTooMuchMoney();
-      } else {
-        it->second->getValue() -= amount;
-      }
-    } catch (const AccountNotFoundException &e) {
-      std::cerr << e.what() << std::endl;
-    } catch (const WithdrawTooMuchMoney &e) {
-      std::cerr << e.what() << std::endl;
+  void withdrawFromAccount(size_t id, float amount) {
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
     }
+    if (it->second->getValue() < amount) {
+      throw WithdrawTooMuchMoney();
+    }
+    it->second->getValue() -= amount;
   }
 
-  void giveLoanToAccount(int id, int amount) {
-    try {
-      if (_liquidity < amount) {
-        throw LiquidityNotSufficient();
-      }
-      std::map<int, Account *>::iterator it = _clientAccounts.find(id);
-      if (it == _clientAccounts.end()) {
-        throw AccountNotFoundException();
-      }
-      _liquidity -= amount;
-      it->second->getValue() += amount;
-    } catch (const LiquidityNotSufficient &e) {
-      std::cerr << e.what() << std::endl;
-    } catch (const AccountNotFoundException &e) {
-      std::cerr << e.what() << std::endl;
+  void giveLoanToAccount(size_t id, int amount) {
+    if (_liquidity < amount) {
+      throw LiquidityNotSufficient();
     }
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
+    _liquidity -= amount;
+    it->second->getValue() += amount;
   }
 };
 
 int main() {
-  Bank bank = Bank();
-  return (0);
+  try {
+    Bank bank;
+    bank.createAccount();
+    bank.depositToAccount(0, 100);
+    bank.withdrawFromAccount(0, 200);
+    bank.deleteAccount(1);
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  } catch (...) {
+    std::cerr << "Unknown error occurred!" << std::endl;
+  }
+
+  return 0;
 }
