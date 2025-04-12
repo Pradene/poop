@@ -111,9 +111,43 @@ int main() {
     Bank bank;
     bank.createAccount();
     bank.depositToAccount(0, 100);
-    std::cout << "Balance: " << bank[0].getValue() << std::endl;
-    bank.withdrawFromAccount(0, 95);
+    bank.withdrawFromAccount(0, 150);
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  } catch (...) {
+    std::cerr << "Unknown error occurred!" << std::endl;
+  }
+
+  try {
+    Bank bank;
+    bank.createAccount();
     bank.deleteAccount(1);
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  } catch (...) {
+    std::cerr << "Unknown error occurred!" << std::endl;
+  }
+
+  try {
+    Bank bank;
+    bank.createAccount();
+    bank.giveLoanToAccount(0, 100);
+  } catch (const std::exception &e) {
+    std::cerr << "Error: " << e.what() << std::endl;
+  } catch (...) {
+    std::cerr << "Unknown error occurred!" << std::endl;
+  }
+
+  try {
+    Bank bank;
+    bank.createAccount();
+    bank.createAccount();
+    bank.deleteAccount(1);
+    bank.createAccount();
+    bank.depositToAccount(0, 100);
+    bank.giveLoanToAccount(2, 5);
+    std::cout << "Account 0 balance: " << bank[0].getValue() << std::endl;
+    std::cout << "Account 2 balance: " << bank[2].getValue() << std::endl;
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
   } catch (...) {
