@@ -5,11 +5,11 @@
 struct Bank {
   struct Account {
   private:
-    float _value;
+    float _balance;
 
   public:
-    Account() : _value(0.0f) {}
-    float getValue() const { return _value; }
+    Account() : _balance(0.0f) {}
+    float getBalance() const { return _balance; }
 
     friend struct Bank;
   };
@@ -35,6 +35,14 @@ private:
   size_t _nextId;
   float _liquidity;
   std::map<size_t, Account *> _clientAccounts;
+
+  Account *getAccount(size_t id) {
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
+    return it->second;
+  }
 
 public:
   Bank() : _nextId(0), _liquidity(0.0f) {}
@@ -65,36 +73,27 @@ public:
     if (amount < 0.0f) {
       throw DepositNegativeAmount();
     }
-    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
-    if (it == _clientAccounts.end()) {
-      throw AccountNotFoundException();
-    }
+    Account *account = Bank::getAccount(id);
     float taxes = amount * 0.05f;
     _liquidity += taxes;
-    it->second->_value += amount - taxes;
+    account->_balance += amount - taxes;
   }
 
   void withdrawFromAccount(size_t id, float amount) {
-    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
-    if (it == _clientAccounts.end()) {
-      throw AccountNotFoundException();
-    }
-    if (it->second->getValue() < amount) {
+    Account *account = Bank::getAccount(id);
+    if (account->_balance < amount) {
       throw WithdrawTooMuchMoney();
     }
-    it->second->_value -= amount;
+    account->_balance -= amount;
   }
 
   void giveLoanToAccount(size_t id, int amount) {
     if (_liquidity < amount) {
       throw LiquidityNotSufficient();
     }
-    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
-    if (it == _clientAccounts.end()) {
-      throw AccountNotFoundException();
-    }
+    Account *account = Bank::getAccount(id);
     _liquidity -= amount;
-    it->second->_value += amount;
+    account->_balance += amount;
   }
 
   const Account &operator[](size_t id) const {
@@ -146,8 +145,8 @@ int main() {
     bank.createAccount();
     bank.depositToAccount(0, 100);
     bank.giveLoanToAccount(2, 5);
-    std::cout << "Account 0 balance: " << bank[0].getValue() << std::endl;
-    std::cout << "Account 2 balance: " << bank[2].getValue() << std::endl;
+    std::cout << "Account 0 balance: " << bank[0].getBalance() << std::endl;
+    std::cout << "Account 2 balance: " << bank[2].getBalance() << std::endl;
   } catch (const std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
   } catch (...) {
