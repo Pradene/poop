@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <iostream>
+#include <vector>
 
 class Worker;
 class Tool;
@@ -56,44 +58,60 @@ class Worker {
 private:
   Position _position;
   Statistic _statistic;
-  Tool *_tool;
+  std::vector<Tool *> _tools;
 
 public:
   Worker() {}
   ~Worker() {}
 
-  Tool *getTool() { return _tool; }
-  void removeTool() { _tool = NULL; }
+  const std::vector<Tool *> &getTools() const { return _tools; }
+
+  void removeTool(Tool *tool) {
+    std::vector<Tool *>::iterator it =
+        std::find(_tools.begin(), _tools.end(), tool);
+    if (it != _tools.end()) {
+      (*it)->setOwner(NULL);
+      _tools.erase(it);
+    }
+  }
+
   void addTool(Tool *tool) {
     Worker *owner = tool->getOwner();
     if (owner != NULL) {
-      owner->removeTool();
+      owner->removeTool(tool);
     }
 
-    _tool = tool;
-    _tool->setOwner(this);
+    _tools.push_back(tool);
+    tool->setOwner(this);
   }
-  void useTool() {
-    if (_tool == NULL) {
-      return;
+
+  void useTools() {
+    for (std::vector<Tool *>::iterator it = _tools.begin(); it != _tools.end();
+         ++it) {
+      (*it)->use();
     }
-    _tool->use();
   }
 };
 
 int main() {
-  Worker worker1 = Worker();
-  Worker worker2 = Worker();
-  Shovel shovel = Shovel();
-  Hammer hammer = Hammer();
+  Worker worker1;
+  Worker worker2;
+  Shovel shovel;
+  Hammer hammer;
 
   worker1.addTool(&shovel);
-  std::cout << worker1.getTool() << std::endl;
-  worker1.useTool();
-  worker2.addTool(&shovel);
-  std::cout << worker1.getTool() << std::endl;
   worker1.addTool(&hammer);
-  std::cout << worker1.getTool() << std::endl;
+
+  std::cout << "worker1 tools count: " << worker1.getTools().size()
+            << std::endl;
+  worker1.useTools();
+
+  worker2.addTool(&shovel);
+
+  std::cout << "worker1 tools count: " << worker1.getTools().size()
+            << std::endl;
+  std::cout << "worker2 tools count: " << worker2.getTools().size()
+            << std::endl;
 
   return 0;
 }
