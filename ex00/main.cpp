@@ -10,7 +10,8 @@ struct Bank {
   public:
     Account() : _value(0.0f) {}
     float getValue() const { return _value; }
-    float &getValue() { return _value; }
+
+    friend struct Bank;
   };
 
   class AccountNotFoundException : public std::exception {
@@ -34,6 +35,14 @@ private:
   size_t _nextId;
   float _liquidity;
   std::map<size_t, Account *> _clientAccounts;
+
+  void modifyAccount(size_t id, float amount) {
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
+    it->second->_value += amount;
+  }
 
 public:
   Bank() : _nextId(0), _liquidity(0.0f) {}
@@ -64,14 +73,9 @@ public:
     if (amount < 0.0f) {
       throw DepositNegativeAmount();
     }
-    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
-    if (it == _clientAccounts.end()) {
-      throw AccountNotFoundException();
-    }
     float taxes = amount * 0.05f;
-    amount -= taxes;
     _liquidity += taxes;
-    it->second->getValue() += amount;
+    modifyAccount(id, amount - taxes);
   }
 
   void withdrawFromAccount(size_t id, float amount) {
@@ -82,19 +86,15 @@ public:
     if (it->second->getValue() < amount) {
       throw WithdrawTooMuchMoney();
     }
-    it->second->getValue() -= amount;
+    modifyAccount(id, -amount);
   }
 
   void giveLoanToAccount(size_t id, int amount) {
     if (_liquidity < amount) {
       throw LiquidityNotSufficient();
     }
-    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
-    if (it == _clientAccounts.end()) {
-      throw AccountNotFoundException();
-    }
     _liquidity -= amount;
-    it->second->getValue() += amount;
+    modifyAccount(id, amount);
   }
 
   const Account &operator[](size_t id) const {
@@ -111,7 +111,7 @@ int main() {
     Bank bank;
     bank.createAccount();
     bank.depositToAccount(0, 100);
-    std::cout << "" << bank[0].getValue() << std::endl;
+    std::cout << "Balance: " << bank[0].getValue() << std::endl;
     bank.withdrawFromAccount(0, 95);
     bank.deleteAccount(1);
   } catch (const std::exception &e) {
