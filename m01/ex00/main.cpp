@@ -1,7 +1,9 @@
 #include <iostream>
 
 class Worker;
+class Tool;
 class Shovel;
+class Hammer;
 
 struct Position {
   int _x;
@@ -14,40 +16,68 @@ struct Statistic {
   int _exp;
 };
 
-class Shovel {
-private:
+class Tool {
+protected:
   size_t _numberOfUses;
   Worker *_owner;
 
 public:
-  Shovel() : _numberOfUses(0), _owner(NULL) {}
-  ~Shovel() {}
+  Tool() : _numberOfUses(0), _owner(NULL) {}
+  virtual ~Tool() {}
+  virtual void use() = 0;
 
-  void use() { _numberOfUses += 1; }
   Worker *getOwner() const { return _owner; }
   void setOwner(Worker *owner) { _owner = owner; }
+};
+
+class Shovel : public Tool {
+public:
+  Shovel() {}
+  ~Shovel() {}
+
+  void use() {
+    _numberOfUses += 1;
+    std::cout << "Use shovel" << std::endl;
+  }
+};
+
+class Hammer : public Tool {
+public:
+  Hammer() {}
+  ~Hammer() {}
+
+  void use() {
+    _numberOfUses += 1;
+    std::cout << "Use hammer" << std::endl;
+  }
 };
 
 class Worker {
 private:
   Position _position;
   Statistic _statistic;
-  Shovel *_shovel;
+  Tool *_tool;
 
 public:
   Worker() {}
   ~Worker() {}
 
-  Shovel *getShovel() { return _shovel; }
-  void removeShovel() { _shovel = NULL; }
-  void addShovel(Shovel *shovel) {
-    Worker *owner = shovel->getOwner();
+  Tool *getTool() { return _tool; }
+  void removeTool() { _tool = NULL; }
+  void addTool(Tool *tool) {
+    Worker *owner = tool->getOwner();
     if (owner != NULL) {
-      owner->removeShovel();
+      owner->removeTool();
     }
 
-    _shovel = shovel;
-    _shovel->setOwner(this);
+    _tool = tool;
+    _tool->setOwner(this);
+  }
+  void useTool() {
+    if (_tool == NULL) {
+      return;
+    }
+    _tool->use();
   }
 };
 
@@ -55,11 +85,15 @@ int main() {
   Worker worker1 = Worker();
   Worker worker2 = Worker();
   Shovel shovel = Shovel();
+  Hammer hammer = Hammer();
 
-  worker1.addShovel(&shovel);
-  std::cout << worker1.getShovel() << std::endl;
-  worker2.addShovel(&shovel);
-  std::cout << worker1.getShovel() << std::endl;
+  worker1.addTool(&shovel);
+  std::cout << worker1.getTool() << std::endl;
+  worker1.useTool();
+  worker2.addTool(&shovel);
+  std::cout << worker1.getTool() << std::endl;
+  worker1.addTool(&hammer);
+  std::cout << worker1.getTool() << std::endl;
 
   return 0;
 }
