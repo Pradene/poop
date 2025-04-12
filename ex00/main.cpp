@@ -36,14 +36,6 @@ private:
   float _liquidity;
   std::map<size_t, Account *> _clientAccounts;
 
-  void modifyAccount(size_t id, float amount) {
-    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
-    if (it == _clientAccounts.end()) {
-      throw AccountNotFoundException();
-    }
-    it->second->_value += amount;
-  }
-
 public:
   Bank() : _nextId(0), _liquidity(0.0f) {}
 
@@ -73,9 +65,13 @@ public:
     if (amount < 0.0f) {
       throw DepositNegativeAmount();
     }
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
     float taxes = amount * 0.05f;
     _liquidity += taxes;
-    modifyAccount(id, amount - taxes);
+    it->second->_value += amount - taxes;
   }
 
   void withdrawFromAccount(size_t id, float amount) {
@@ -86,15 +82,19 @@ public:
     if (it->second->getValue() < amount) {
       throw WithdrawTooMuchMoney();
     }
-    modifyAccount(id, -amount);
+    it->second->_value -= amount;
   }
 
   void giveLoanToAccount(size_t id, int amount) {
     if (_liquidity < amount) {
       throw LiquidityNotSufficient();
     }
+    std::map<size_t, Account *>::iterator it = _clientAccounts.find(id);
+    if (it == _clientAccounts.end()) {
+      throw AccountNotFoundException();
+    }
     _liquidity -= amount;
-    modifyAccount(id, amount);
+    it->second->_value += amount;
   }
 
   const Account &operator[](size_t id) const {
