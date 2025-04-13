@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 
+class Workshop;
 class Worker;
 class Tool;
 class Shovel;
@@ -59,6 +60,7 @@ private:
   Position _position;
   Statistic _statistic;
   std::vector<Tool *> _tools;
+  Workshop *_workshop;
 
 public:
   Worker() {}
@@ -89,6 +91,35 @@ public:
     for (std::vector<Tool *>::iterator it = _tools.begin(); it != _tools.end();
          ++it) {
       (*it)->use();
+    }
+  }
+
+  void work() {}
+};
+
+class Workshop {
+private:
+  std::vector<Worker *> _workers;
+
+public:
+  Workshop() {}
+  ~Workshop() {}
+
+  void addWorker(Worker *worker) { _workers.push_back(worker); }
+
+  void removeWorker(Worker *worker) {
+    std::vector<Worker *>::iterator it =
+        std::find(_workers.begin(), _workers.end(), worker);
+    if (it == _workers.end()) {
+      return;
+    }
+    _workers.erase(it);
+  }
+
+  void executeWorkDay() {
+    for (std::vector<Worker *>::iterator it = _workers.begin();
+         it != _workers.end(); ++it) {
+      (*it)->work();
     }
   }
 };
