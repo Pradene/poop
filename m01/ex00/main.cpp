@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <vector>
 
 class Workshop;
@@ -22,15 +23,11 @@ struct Statistic {
 class Tool {
 protected:
   size_t _numberOfUses;
-  Worker *_owner;
 
 public:
-  Tool() : _numberOfUses(0), _owner(NULL) {}
+  Tool() : _numberOfUses(0) {}
   virtual ~Tool() {}
   virtual void use() = 0;
-
-  Worker *getOwner() const { return _owner; }
-  void setOwner(Worker *owner) { _owner = owner; }
 };
 
 class Shovel : public Tool {
@@ -55,6 +52,38 @@ public:
   }
 };
 
+class ToolRegistry {
+private:
+  std::map<Tool *, Worker *> _toolOwnership;
+
+  // Singleton pattern
+  static ToolRegistry *_instance;
+  ToolRegistry() {}
+
+public:
+  static ToolRegistry *getInstance() {
+    if (_instance == NULL) {
+      _instance = new ToolRegistry();
+    }
+    return _instance;
+  }
+
+  Worker *getOwner(Tool *tool) {
+    if (_toolOwnership.find(tool) != _toolOwnership.end()) {
+      return _toolOwnership[tool];
+    }
+    return NULL;
+  }
+
+  void registerOwnership(Tool *tool, Worker *worker) {
+    _toolOwnership[tool] = worker;
+  }
+
+  void removeOwnership(Tool *tool) { _toolOwnership.erase(tool); }
+};
+
+ToolRegistry *ToolRegistry::_instance = NULL;
+
 class Worker {
 private:
   Position _position;
@@ -71,20 +100,21 @@ public:
   void removeTool(Tool *tool) {
     std::vector<Tool *>::iterator it =
         std::find(_tools.begin(), _tools.end(), tool);
-    if (it != _tools.end()) {
-      (*it)->setOwner(NULL);
-      _tools.erase(it);
+    if (it == _tools.end()) {
+      return;
     }
+    ToolRegistry::getInstance()->removeOwnership(tool);
+    _tools.erase(it);
   }
 
   void addTool(Tool *tool) {
-    Worker *owner = tool->getOwner();
-    if (owner != NULL) {
-      owner->removeTool(tool);
+    Worker *currentOwner = ToolRegistry::getInstance()->getOwner(tool);
+    if (currentOwner != NULL && currentOwner != this) {
+      currentOwner->removeTool(tool);
     }
 
+    ToolRegistry::getInstance()->registerOwnership(tool, this);
     _tools.push_back(tool);
-    tool->setOwner(this);
   }
 
   void addWorkshop(Workshop *workshop) { _workshop.push_back(workshop); }
