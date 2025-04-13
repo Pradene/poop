@@ -105,6 +105,17 @@ public:
     }
   }
 
+  template <typename ToolType> ToolType *getTool() const {
+    for (std::vector<Tool *>::const_iterator it = _tools.begin();
+         it != _tools.end(); ++it) {
+      ToolType *tool = dynamic_cast<ToolType *>(*it);
+      if (tool != NULL) {
+        return tool;
+      }
+    }
+    return NULL;
+  }
+
   void work() {}
 };
 
@@ -147,6 +158,7 @@ int main() {
 
   worker1.addTool(&shovel);
   worker1.addTool(&hammer);
+  std::cout << worker1.getTool<Hammer>() << std::endl;
 
   std::cout << "worker1 tools count: " << worker1.getTools().size()
             << std::endl;
