@@ -55,8 +55,6 @@ public:
 class ToolRegistry {
 private:
   std::map<Tool *, Worker *> _toolOwnership;
-
-  // Singleton pattern
   static ToolRegistry *_instance;
   ToolRegistry() {}
 
