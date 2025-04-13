@@ -60,7 +60,7 @@ private:
   Position _position;
   Statistic _statistic;
   std::vector<Tool *> _tools;
-  Workshop *_workshop;
+  std::vector<Workshop *> _workshop;
 
 public:
   Worker() {}
@@ -87,6 +87,17 @@ public:
     tool->setOwner(this);
   }
 
+  void addWorkshop(Workshop *workshop) { _workshop.push_back(workshop); }
+
+  void removeWorkshop(Workshop *workshop) {
+    std::vector<Workshop *>::iterator it =
+        std::find(_workshop.begin(), _workshop.end(), workshop);
+    if (it == _workshop.end()) {
+      return;
+    }
+    _workshop.erase(it);
+  }
+
   void useTools() {
     for (std::vector<Tool *>::iterator it = _tools.begin(); it != _tools.end();
          ++it) {
@@ -105,7 +116,10 @@ public:
   Workshop() {}
   ~Workshop() {}
 
-  void addWorker(Worker *worker) { _workers.push_back(worker); }
+  void addWorker(Worker *worker) {
+    worker->addWorkshop(this);
+    _workers.push_back(worker);
+  }
 
   void removeWorker(Worker *worker) {
     std::vector<Worker *>::iterator it =
@@ -113,6 +127,7 @@ public:
     if (it == _workers.end()) {
       return;
     }
+    worker->removeWorkshop(this);
     _workers.erase(it);
   }
 
