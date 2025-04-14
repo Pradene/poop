@@ -1,10 +1,10 @@
 NAME = main
 
 CXX = c++
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -Iincs
 
 # Source and build directories
-SRC_DIR = .
+SRC_DIR = srcs
 BUILD_DIR = build
 
 # Source files (add more files here later)
@@ -41,3 +41,4 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
