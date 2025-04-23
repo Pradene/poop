@@ -9,6 +9,7 @@ class Shape {
 public:
     virtual ~Shape() {}
     virtual float area() const = 0;
+    virtual float perimeter() const = 0;
 };
 
 #endif // SHAPE_HPP

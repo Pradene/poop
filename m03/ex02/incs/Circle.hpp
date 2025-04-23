@@ -14,6 +14,10 @@ public:
     float area() const {
         return M_PI * powf(_radius, 2.0f);
     }
+
+    float perimeter() const {
+        return 2.0f * M_PI * _radius;
+    }
 };
 
 

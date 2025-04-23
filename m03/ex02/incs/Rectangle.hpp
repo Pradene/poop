@@ -15,6 +15,10 @@ public:
     float area() const {
         return _width * _height;
     }
+
+    float perimeter() const {
+        return (_width + _height) * 2.0f;
+    }
 };
 
 

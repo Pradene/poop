@@ -17,6 +17,10 @@ public:
     float area() const {
         return 0.5f * fabs((_b._x - _a._x)*(_c._y - _a._y) - (_c._x - _a._x)*(_b._y - _a._y));
     }
+
+    float perimeter() const {
+        return _a.distanceTo(_b) + _b.distanceTo(_c) + _c.distanceTo(_a);
+    }
 };
 
 
