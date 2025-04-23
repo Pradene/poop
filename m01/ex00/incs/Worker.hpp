@@ -10,11 +10,18 @@ struct Position {
   int _x;
   int _y;
   int _z;
+
+public:
+  Position(int x, int y, int z): _x(x), _y(y), _z(z) {}
+  ~Position() {}
 };
 
 struct Statistic {
   int _level;
   int _exp;
+
+  Statistic(int level, int exp): _level(level), _exp(exp) {}
+  ~Statistic() {}
 };
 
 class Worker {

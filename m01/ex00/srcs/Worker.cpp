@@ -2,7 +2,7 @@
 #include "Registry.hpp"
 #include <algorithm>
 
-Worker::Worker() {}
+Worker::Worker(): _position(0, 0, 0), _statistic(0, 0) {}
 Worker::~Worker() {}
 
 const std::vector<Tool *> &Worker::getTools() const { return _tools; }
