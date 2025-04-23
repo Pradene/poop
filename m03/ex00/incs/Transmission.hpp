@@ -13,19 +13,17 @@ public:
   void shiftUp() {
     if (_gear <= -1) {
       std::cout << "Cannot shift up from reverse. Shift to neutral first.\n";
-      return;
     } else if (_gear >= _gearNumber) {
       std::cout << "Cannot shift up, max gear\n";
-      return;
     } else {
-      _gear++;
+      _gear += 1;
       std::cout << "Shifted up to gear " << _gear << std::endl;
     }
   }
 
   void shiftDown() {
     if (_gear > 0) {
-      _gear--;
+      _gear -= 1;
       std::cout << "Shifted down to gear " << _gear << std::endl;
     } else if (_gear == 0) {
       std::cout << "Already in neutral. Shift to reverse if needed.\n";
