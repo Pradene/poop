@@ -20,7 +20,7 @@ void Workshop::removeWorker(Worker *worker) {
   _workers.erase(it);
 }
 
-void Workshop::executeWorkDay() {
+void Workshop::executeWorkday() {
   for (std::vector<Worker *>::iterator it = _workers.begin();
        it != _workers.end(); ++it) {
     (*it)->work();

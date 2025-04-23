@@ -15,7 +15,7 @@ public:
 
   void addWorker(Worker *worker);
   void removeWorker(Worker *worker);
-  void executeWorkDay();
+  void executeWorkday();
 };
 
 #endif // WORKSHOP_HPP
