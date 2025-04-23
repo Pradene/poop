@@ -1,7 +1,6 @@
-#include <iostream>
-#include "Command.hpp"
 #include "PackageReductionDiscountCommand.hpp"
 #include "TuesdayDiscountCommand.hpp"
+#include <iostream>
 
 int main() {
   Command c1(0);
@@ -16,7 +15,6 @@ int main() {
   std::cout << c2.getClientId() << ": " << c2.getPrice() << std::endl;
   std::cout << c3.getClientId() << ": " << c3.getPrice() << std::endl;
   std::cout << c4.getClientId() << ": " << c4.getPrice() << std::endl;
-
 
   return 0;
 }

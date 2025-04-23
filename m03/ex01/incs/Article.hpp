@@ -1,7 +1,6 @@
 #ifndef ARTICLE_HPP
 #define ARTICLE_HPP
 
-
 class Article {
 private:
   std::string _name;
